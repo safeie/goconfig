@@ -1,6 +1,6 @@
 **本程序 forked from https://github.com/msbranco/goconfig**
 
-###为了满足自己的需求，做了简化和简单修改
+###为了满足个人需求，做了简化和简单修改
 
 1. 去除了原版的写入配置文件的功能，只需要读取配置文件
 2. 去除了原版的配置内容可相互引用的处理，不需要那么复杂，KEY->VALUE就可以了
@@ -18,13 +18,13 @@
 
 ###程序中已经提交了测试用的配置文件示例，如：
 
-[redis]
-redisAddr = "192.168.1.80:6379"
-redisDb = 0
-redisList = "ltest"
-
-[log]
-logOpen = no
-logFile = "/var/log/test.log"
-logDays = 14
-logSize = 1.5
+    [redis]
+    redisAddr = "192.168.1.80:6379"
+    redisDb = 0
+    redisList = "ltest"
+    
+    [log]
+    logOpen = no
+    logFile = "/var/log/test.log"
+    logDays = 14
+    logSize = 1.5
