@@ -18,6 +18,7 @@
 
 ###程序中已经提交了测试用的配置文件示例，如：
 
+    ;some comments
     [redis]
     redisAddr = "192.168.1.80:6379"
     redisDb = 0
