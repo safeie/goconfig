@@ -31,3 +31,42 @@
     logFile = "/var/log/test.log"
     logDays = 14
     logSize = 1.5
+
+###使用非常简单：
+
+    package main
+
+	import (
+		"fmt"
+		"github.com/9466/goconfig"
+	)
+
+	func main() {
+		c, err := goconfig.ReadConfigFile("t.conf")
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		//  fmt.Println(c)
+		sv, err := c.GetString("redis", "redisAddr")
+		fmt.Println(sv)
+	}
+    
+**读取字符串：**
+
+    c.GetString(section string, option string) string
+    
+**读取整数值：**
+
+    c.GetInt64(section string, option string) int64
+    
+**读取浮点数：**
+
+    c.GetFloat(section string, option string) float64
+    
+**读取布尔值：**
+
+    c.GetBool(section string, option string) bool
+    
+###注意：
+
+如果配置字段不包括在任何section中，也就是没写section，程序会自动写入 ***[default]*** 片段。
