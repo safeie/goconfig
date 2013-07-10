@@ -73,6 +73,14 @@ func (c *ConfigFile) GetString(section, option string) (string, error) {
 	return value, nil
 }
 
+func (c *ConfigFile) GetInt(section, option string) (int, error) {
+	value, err := c.GetInt64(section, option)
+	if err != nil {
+		return 0, err
+	}
+	return int(value), nil
+}
+
 func (c *ConfigFile) GetInt64(section, option string) (int64, error) {
 	value, err := c.GetRawString(section, option)
 	if err != nil {
