@@ -52,6 +52,18 @@ func (c *ConfigFile) AddOption(section, option, value string) bool {
 	return true
 }
 
+func (c *ConfigFile) GetSection(section string) ([]string, error) {
+	section = strings.ToLower(section)
+	if _, ok := c.data[section]; ok {
+		options := make([]string, 0, len(c.data[section]))
+		for key, _ := range c.data[section] {
+			options = append(options, key)
+		}
+		return options, nil
+	}
+	return nil, errors.New(fmt.Sprintf("Section not found: %s", section))
+}
+
 func (c *ConfigFile) GetRawString(section, option string) (string, error) {
 	section = strings.ToLower(section)
 	option = strings.ToLower(option)
