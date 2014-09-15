@@ -13,7 +13,7 @@ func TestConfig1(t *testing.T) {
 	}
 	
 	// section
-	section, err := c.GetSection("log")
+	_, err := c.GetSection("log")
 	if err != nil {
 		t.Error(err.Error())
 	}
