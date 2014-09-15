@@ -11,6 +11,12 @@ func TestConfig1(t *testing.T) {
 		t.Error(err.Error())
 		t.Error("read config faild!")
 	}
+	
+	// section
+	section, err := c.GetSection("log")
+	if err != nil {
+		t.Error(err.Error())
+	}
 
 	// string
 	sv, err := c.GetString("redis", "redisAddr")
