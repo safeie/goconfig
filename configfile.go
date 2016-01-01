@@ -56,7 +56,7 @@ func (c *ConfigFile) GetSection(section string) ([]string, error) {
 	section = strings.ToLower(section)
 	if _, ok := c.data[section]; ok {
 		options := make([]string, 0, len(c.data[section]))
-		for key, _ := range c.data[section] {
+		for key := range c.data[section] {
 			options = append(options, key)
 		}
 		return options, nil
@@ -127,6 +127,46 @@ func (c *ConfigFile) GetBool(section, option string) (bool, error) {
 		return false, errors.New(fmt.Sprintf("Cound not parse bool value: %s", value))
 	}
 	return bv, nil
+}
+
+func (c *ConfigFile) MustString(section, option, value string) string {
+	val, err := c.GetString(section, option)
+	if err != nil || val == "" {
+		return value
+	}
+	return val
+}
+
+func (c *ConfigFile) MustInt(section, option string, value int) int {
+	val, err := c.GetInt(section, option)
+	if err != nil || val == 0 {
+		return value
+	}
+	return val
+}
+
+func (c *ConfigFile) MustInt64(section, option string, value int64) int64 {
+	val, err := c.GetInt64(section, option)
+	if err != nil || val == 0 {
+		return value
+	}
+	return val
+}
+
+func (c *ConfigFile) MustFloat(section, option string, value float64) float64 {
+	val, err := c.GetFloat(section, option)
+	if err != nil || val == 0.0 {
+		return value
+	}
+	return val
+}
+
+func (c *ConfigFile) MustBool(section, option string, value bool) bool {
+	val, err := c.GetBool(section, option)
+	if err != nil {
+		return value
+	}
+	return val
 }
 
 // init a new ConfigFile
