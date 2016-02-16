@@ -232,6 +232,7 @@ func (c *ConfigFile) read(buf *bufio.Reader) error {
 				value := strings.TrimSpace(stripComments(l[i+1:]))
 				value = strings.Trim(value, "\"")
 				value = strings.Trim(value, "'")
+				value = strings.Trim(value, "`")
 				c.AddOption(section, option, value)
 			case section != "" && option != "":
 				// continuation of multi-line value
