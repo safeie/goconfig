@@ -10,13 +10,16 @@ import (
 	"strings"
 )
 
+// ConfigFile config handler
 type ConfigFile struct {
 	data map[string]map[string]string
 }
 
 var (
-	DefaultSection string = "default"
+	// DefaultSection if item not in any section, store in default section
+	DefaultSection = "default"
 
+	// BoolStrings parse to bool values
 	BoolStrings = map[string]bool{
 		"0":     false,
 		"1":     true,
@@ -52,25 +55,13 @@ func (c *ConfigFile) AddOption(section, option, value string) bool {
 	return true
 }
 
-func (c *ConfigFile) GetSection(section string) ([]string, error) {
-	section = strings.ToLower(section)
-	if _, ok := c.data[section]; ok {
-		options := make([]string, 0, len(c.data[section]))
-		for key := range c.data[section] {
-			options = append(options, key)
-		}
-		return options, nil
-	}
-	return nil, errors.New(fmt.Sprintf("Section not found: %s", section))
-}
-
 func (c *ConfigFile) GetRawString(section, option string) (string, error) {
 	section = strings.ToLower(section)
 	option = strings.ToLower(option)
 
 	if _, ok := c.data[section]; ok {
 		if value, ok := c.data[section][option]; ok {
-			return value, nil
+			return formatEnv(value), nil
 		}
 		return "", errors.New(fmt.Sprintf("Option not found: %s", option))
 	}
@@ -261,4 +252,12 @@ func ReadConfigFile(f string) (*ConfigFile, error) {
 		return nil, err
 	}
 	return c, nil
+}
+
+func formatEnv(s string) string {
+	if len(s) > 4 && s[0:4] == "ENV:" {
+		s = s[4:]
+		return os.Getenv(s)
+	}
+	return s
 }

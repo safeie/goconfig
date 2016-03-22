@@ -1,8 +1,7 @@
 package goconfig
 
-import (
-	"testing"
-)
+import "testing"
+import "os"
 
 func TestConfig1(t *testing.T) {
 	var f string = "example.conf"
@@ -10,12 +9,6 @@ func TestConfig1(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 		t.Error("read config faild!")
-	}
-
-	// section
-	_, err = c.GetSection("log")
-	if err != nil {
-		t.Error(err.Error())
 	}
 
 	// string
@@ -121,5 +114,13 @@ func TestConfig1(t *testing.T) {
 	bv = c.MustBool("log", "logOpen", true)
 	if bv != false {
 		t.Error("c.MustBool(\"log\", \"logOpen\") should be false, but: ", bv)
+	}
+
+	// Env test
+	os.Setenv("GOCONFIG_ENV_TEST", "foo")
+	c.AddOption("env", "test", "ENV:GOCONFIG_ENV_TEST")
+	ev := c.MustString("env", "test", "")
+	if ev != "foo" {
+		t.Error("c.MustBool(\"env\", \"test\") should be foo, but: ", ev)
 	}
 }
