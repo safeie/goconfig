@@ -65,7 +65,7 @@ func (c *ConfigFile) GetRawString(section, option string) (string, error) {
 
 	if _, ok := c.data[section]; ok {
 		if value, ok := c.data[section][option]; ok {
-			return c.parseEnv(value), nil
+			return value, nil
 		}
 		return "", fmt.Errorf("Option not found: %s", option)
 	}
@@ -254,12 +254,12 @@ func (c *ConfigFile) read(buf *bufio.Reader) error {
 }
 
 // parseEnv parse system ENV in values
-func (c *ConfigFile) parseEnv(s string) string {
-	if len(s) > 4 && s[0:4] == "ENV:" {
-		s = s[4:]
-		return os.Getenv(s)
+func (c *ConfigFile) parseEnv() {
+	for section := range c.data {
+		for option := range c.data[section] {
+			c.data[section][option] = parseEnv(c.data[section][option])
+		}
 	}
-	return s
 }
 
 // parseVariables parse variables in values
@@ -312,6 +312,16 @@ func ReadConfigFile(f string) (*ConfigFile, error) {
 	if err = file.Close(); err != nil {
 		return nil, err
 	}
+	c.parseEnv()
 	c.parseVariables()
 	return c, nil
+}
+
+// parseEnv parse system ENV in values
+func parseEnv(s string) string {
+	if len(s) > 4 && s[0:4] == "ENV:" {
+		s = s[4:]
+		return os.Getenv(s)
+	}
+	return s
 }

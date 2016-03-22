@@ -118,7 +118,7 @@ func TestConfig1(t *testing.T) {
 
 	// Env test
 	os.Setenv("GOCONFIG_ENV_TEST", "foo")
-	c.AddOption("env", "test", "ENV:GOCONFIG_ENV_TEST")
+	c.AddOption("env", "test", parseEnv("ENV:GOCONFIG_ENV_TEST"))
 	ev := c.MustString("env", "test", "")
 	if ev != "foo" {
 		t.Error("c.MustBool(\"env\", \"test\") should be foo, but: ", ev)
