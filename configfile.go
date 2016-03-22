@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -34,6 +35,7 @@ var (
 	}
 )
 
+// AddSection add a new section
 func (c *ConfigFile) AddSection(section string) bool {
 	section = strings.ToLower(section)
 	if _, ok := c.data[section]; ok {
@@ -43,6 +45,7 @@ func (c *ConfigFile) AddSection(section string) bool {
 	return true
 }
 
+// AddOption add a new option with section
 func (c *ConfigFile) AddOption(section, option, value string) bool {
 	c.AddSection(section)
 	section = strings.ToLower(section)
@@ -55,19 +58,21 @@ func (c *ConfigFile) AddOption(section, option, value string) bool {
 	return true
 }
 
+// GetRawString get the raw option values
 func (c *ConfigFile) GetRawString(section, option string) (string, error) {
 	section = strings.ToLower(section)
 	option = strings.ToLower(option)
 
 	if _, ok := c.data[section]; ok {
 		if value, ok := c.data[section][option]; ok {
-			return formatEnv(value), nil
+			return c.parseEnv(value), nil
 		}
-		return "", errors.New(fmt.Sprintf("Option not found: %s", option))
+		return "", fmt.Errorf("Option not found: %s", option)
 	}
-	return "", errors.New(fmt.Sprintf("Section not found: %s", section))
+	return "", fmt.Errorf("Section not found: %s", section)
 }
 
+// GetString format value and return string
 func (c *ConfigFile) GetString(section, option string) (string, error) {
 	value, err := c.GetRawString(section, option)
 	if err != nil {
@@ -76,6 +81,7 @@ func (c *ConfigFile) GetString(section, option string) (string, error) {
 	return value, nil
 }
 
+// GetInt format value and return int
 func (c *ConfigFile) GetInt(section, option string) (int, error) {
 	value, err := c.GetInt64(section, option)
 	if err != nil {
@@ -84,6 +90,7 @@ func (c *ConfigFile) GetInt(section, option string) (int, error) {
 	return int(value), nil
 }
 
+// GetInt64 format value and return int64
 func (c *ConfigFile) GetInt64(section, option string) (int64, error) {
 	value, err := c.GetRawString(section, option)
 	if err != nil {
@@ -96,6 +103,7 @@ func (c *ConfigFile) GetInt64(section, option string) (int64, error) {
 	return iv, nil
 }
 
+// GetFloat format value and return float64
 func (c *ConfigFile) GetFloat(section, option string) (float64, error) {
 	value, err := c.GetRawString(section, option)
 	if err != nil {
@@ -108,6 +116,7 @@ func (c *ConfigFile) GetFloat(section, option string) (float64, error) {
 	return fv, nil
 }
 
+// GetBool format value and return bool
 func (c *ConfigFile) GetBool(section, option string) (bool, error) {
 	value, err := c.GetRawString(section, option)
 	if err != nil {
@@ -115,11 +124,12 @@ func (c *ConfigFile) GetBool(section, option string) (bool, error) {
 	}
 	bv, ok := BoolStrings[strings.ToLower(value)]
 	if ok == false {
-		return false, errors.New(fmt.Sprintf("Cound not parse bool value: %s", value))
+		return false, fmt.Errorf("Cound not parse bool value: %s", value)
 	}
 	return bv, nil
 }
 
+// MustString format value and return string or default value
 func (c *ConfigFile) MustString(section, option, value string) string {
 	val, err := c.GetString(section, option)
 	if err != nil || val == "" {
@@ -128,6 +138,7 @@ func (c *ConfigFile) MustString(section, option, value string) string {
 	return val
 }
 
+// MustInt format value and return int or default value
 func (c *ConfigFile) MustInt(section, option string, value int) int {
 	val, err := c.GetInt(section, option)
 	if err != nil || val == 0 {
@@ -136,6 +147,7 @@ func (c *ConfigFile) MustInt(section, option string, value int) int {
 	return val
 }
 
+// MustInt64 format value and return int64 or default value
 func (c *ConfigFile) MustInt64(section, option string, value int64) int64 {
 	val, err := c.GetInt64(section, option)
 	if err != nil || val == 0 {
@@ -144,6 +156,7 @@ func (c *ConfigFile) MustInt64(section, option string, value int64) int64 {
 	return val
 }
 
+// MustFloat format value and return float64 or default value
 func (c *ConfigFile) MustFloat(section, option string, value float64) float64 {
 	val, err := c.GetFloat(section, option)
 	if err != nil || val == 0.0 {
@@ -152,6 +165,7 @@ func (c *ConfigFile) MustFloat(section, option string, value float64) float64 {
 	return val
 }
 
+// MustBool format value and return bool or default value
 func (c *ConfigFile) MustBool(section, option string, value bool) bool {
 	val, err := c.GetBool(section, option)
 	if err != nil {
@@ -160,7 +174,7 @@ func (c *ConfigFile) MustBool(section, option string, value bool) bool {
 	return val
 }
 
-// init a new ConfigFile
+// NewConfigFile init a new ConfigFile
 func NewConfigFile() *ConfigFile {
 	c := new(ConfigFile)
 	c.data = make(map[string]map[string]string)
@@ -231,7 +245,7 @@ func (c *ConfigFile) read(buf *bufio.Reader) error {
 				value := strings.TrimSpace(stripComments(l))
 				c.AddOption(section, option, prev+"\n"+value)
 			default:
-				return errors.New(fmt.Sprintf("Cound not parse line: %s", l))
+				return fmt.Errorf("Cound not parse line: %s", l)
 			}
 
 		}
@@ -239,6 +253,52 @@ func (c *ConfigFile) read(buf *bufio.Reader) error {
 	return nil
 }
 
+// parseEnv parse system ENV in values
+func (c *ConfigFile) parseEnv(s string) string {
+	if len(s) > 4 && s[0:4] == "ENV:" {
+		s = s[4:]
+		return os.Getenv(s)
+	}
+	return s
+}
+
+// parseVariables parse variables in values
+func (c *ConfigFile) parseVariables() {
+	var hasVariable bool
+	re, err := regexp.Compile("{{(?U:.+)}}")
+	if err != nil {
+		return
+	}
+	for {
+		hasVariable = false
+		for section := range c.data {
+			for option := range c.data[section] {
+				c.data[section][option] = re.ReplaceAllStringFunc(c.data[section][option],
+					func(s string) string {
+						hasVariable = true
+						vars := strings.Split(strings.TrimSpace(s[2:len(s)-2]), ".")
+						if len(vars) == 1 {
+							vars = append(vars, vars[0])
+							vars[0] = section
+						}
+						if vars[0] == "" {
+							vars[0] = section
+						}
+						val, err := c.GetString(vars[0], vars[1])
+						if err != nil {
+							return "[VARIABLES_PARSE_ERROR:" + err.Error() + "]"
+						}
+						return val
+					})
+			}
+		}
+		if !hasVariable {
+			break
+		}
+	}
+}
+
+// ReadConfigFile create a configFile handler from a config file and returns
 func ReadConfigFile(f string) (*ConfigFile, error) {
 	file, err := os.Open(f)
 	if err != nil {
@@ -251,13 +311,6 @@ func ReadConfigFile(f string) (*ConfigFile, error) {
 	if err = file.Close(); err != nil {
 		return nil, err
 	}
+	c.parseVariables()
 	return c, nil
-}
-
-func formatEnv(s string) string {
-	if len(s) > 4 && s[0:4] == "ENV:" {
-		s = s[4:]
-		return os.Getenv(s)
-	}
-	return s
 }

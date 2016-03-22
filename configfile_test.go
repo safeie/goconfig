@@ -123,4 +123,10 @@ func TestConfig1(t *testing.T) {
 	if ev != "foo" {
 		t.Error("c.MustBool(\"env\", \"test\") should be foo, but: ", ev)
 	}
+
+	// variable test
+	ev = c.MustString("redis", "redisAddr", "")
+	if ev != "192.168.1.80:6379" {
+		t.Error("c.MustString(\"redis\", \"redisAddr\") should be 192.168.1.80:6379, but: ", ev)
+	}
 }
