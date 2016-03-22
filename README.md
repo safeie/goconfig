@@ -9,7 +9,7 @@
 5. 支持使用井号和分号“#;”做注释
 6. 可选的值引号包裹
 7. 自动忽略空行
-8. 支持系统环境变量(ENV:xxx)
+8. 支持系统环境变量 {{ENV:xxx}}
 9. 添加变量支持，{{section.val}} 或者 {{.val}} 获取当前section的内容
 
 ###程序中已经提交了测试用的配置文件示例，如：
@@ -27,7 +27,7 @@
     logFile = "/var/log/test.log"
     logDays = 14
     logSize = 1.5
-    logEnv = ENV:OS_TEST
+    logEnv = {{ENV:OS_TEST}}
 
 ###使用非常简单：
 

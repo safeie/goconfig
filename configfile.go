@@ -319,9 +319,15 @@ func ReadConfigFile(f string) (*ConfigFile, error) {
 
 // parseEnv parse system ENV in values
 func parseEnv(s string) string {
-	if len(s) > 4 && s[0:4] == "ENV:" {
-		s = s[4:]
-		return os.Getenv(s)
+	re, err := regexp.Compile("{{(?U:.+)}}")
+	if err != nil {
+		return "[ENV_PARSE_ERROR:" + err.Error() + "]"
 	}
-	return s
+	return re.ReplaceAllStringFunc(s, func(s string) string {
+		ss := strings.TrimSpace(s[2 : len(s)-2])
+		if len(ss) > 4 && ss[:4] == "ENV:" {
+			return os.Getenv(ss[4:])
+		}
+		return s
+	})
 }
