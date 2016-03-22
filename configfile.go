@@ -265,6 +265,7 @@ func (c *ConfigFile) parseEnv(s string) string {
 // parseVariables parse variables in values
 func (c *ConfigFile) parseVariables() {
 	var hasVariable bool
+	var varSection, varOption string
 	re, err := regexp.Compile("{{(?U:.+)}}")
 	if err != nil {
 		return
@@ -276,15 +277,15 @@ func (c *ConfigFile) parseVariables() {
 				c.data[section][option] = re.ReplaceAllStringFunc(c.data[section][option],
 					func(s string) string {
 						hasVariable = true
-						vars := strings.Split(strings.TrimSpace(s[2:len(s)-2]), ".")
-						if len(vars) == 1 {
-							vars = append(vars, vars[0])
-							vars[0] = section
+						ss := strings.TrimSpace(s[2 : len(s)-2])
+						pos := strings.Index(ss, ".")
+						if pos < 1 {
+							varSection = section
+						} else {
+							varSection = ss[:pos]
 						}
-						if vars[0] == "" {
-							vars[0] = section
-						}
-						val, err := c.GetString(vars[0], vars[1])
+						varOption = ss[pos+1:]
+						val, err := c.GetString(varSection, varOption)
 						if err != nil {
 							return "[VARIABLES_PARSE_ERROR:" + err.Error() + "]"
 						}
