@@ -45,6 +45,15 @@ func (c *ConfigFile) AddSection(section string) bool {
 	return true
 }
 
+// RemoveSection remove an exists section
+func (c *ConfigFile) RemoveSection(section string) bool {
+	section = strings.ToLower(section)
+	if _, ok := c.data[section]; ok {
+		delete(c.data, section)
+	}
+	return true
+}
+
 // AddOption add a new option with section
 func (c *ConfigFile) AddOption(section, option, value string) bool {
 	c.AddSection(section)
@@ -55,6 +64,19 @@ func (c *ConfigFile) AddOption(section, option, value string) bool {
 		//we need update vale, so do not return
 	}
 	c.data[section][option] = value
+	return true
+}
+
+// RemoveOption remove an exists option with section
+func (c *ConfigFile) RemoveOption(section, option string) bool {
+	section = strings.ToLower(section)
+	option = strings.ToLower(option)
+	if _, ok := c.data[section]; !ok {
+		return true
+	}
+	if _, ok := c.data[section][option]; ok {
+		delete(c.data[section], option)
+	}
 	return true
 }
 
