@@ -229,9 +229,10 @@ func (c *ConfigFile) read(buf *bufio.Reader) error {
 	section = DefaultSection
 	for {
 		l, err := buf.ReadString('\n') // parse line-by-line
-		if err == io.EOF {
-			break
-		} else if err != nil {
+		if l == "" && err != nil {
+			if err == io.EOF {
+				break
+			}
 			return err
 		}
 		l = strings.TrimSpace(l)
