@@ -94,6 +94,26 @@ func (c *ConfigFile) GetRawString(section, option string) (string, error) {
 	return "", fmt.Errorf("Section not found: %s", section)
 }
 
+// GetPrefix get the raw option values with prefix
+func (c *ConfigFile) GetPrefix(section, prefix string, keep bool) (map[string]string, error) {
+	section = strings.ToLower(section)
+	prefix = strings.ToLower(prefix)
+
+	vals := make(map[string]string)
+	if _, ok := c.data[section]; ok {
+		for key, val := range c.data[section] {
+			if strings.HasPrefix(key, prefix) {
+				if keep == false {
+					key = key[len(prefix):]
+				}
+				vals[key] = val
+			}
+		}
+		return vals, nil
+	}
+	return nil, fmt.Errorf("Section not found: %s", section)
+}
+
 // GetString format value and return string
 func (c *ConfigFile) GetString(section, option string) (string, error) {
 	value, err := c.GetRawString(section, option)

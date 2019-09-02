@@ -131,3 +131,33 @@ func TestConfig1(t *testing.T) {
 		t.Error("c.MustString(\"redis\", \"redisAddr\") should be 192.168.1.80:6379, but: ", ev)
 	}
 }
+
+func TestConfig2(t *testing.T) {
+	var f string = "example.conf"
+	c, err := ReadConfigFile(f)
+	if err != nil {
+		t.Error(err.Error())
+		t.Error("read config faild!")
+	}
+	data, err := c.GetPrefix("default", "app.", false)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(data) != 2 {
+		t.Error("data should has two items")
+	}
+	if data["key2"] != "val2" {
+		t.Error("data.key2 should be equal val2")
+	}
+
+	data, err = c.GetPrefix("default", "app.", true)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(data) != 2 {
+		t.Error("data should has two items")
+	}
+	if data["app.key2"] != "val2" {
+		t.Error("data.key2 should be equal val2")
+	}
+}
